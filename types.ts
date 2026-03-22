@@ -36,16 +36,6 @@ export enum TextEffect {
   GLITCH = 'glitch'
 }
 
-export interface UserProfile {
-  uid: string;
-  name: string;
-  email: string;
-  phone?: string;
-  isPro: boolean;
-  savedDesignsCount: number;
-  lastLogin: string;
-}
-
 export interface PosterData {
   id?: string; // Database ID
   userId?: string; // Owner ID

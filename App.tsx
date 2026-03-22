@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { AppMode, PosterData, TemplateStyle, LayoutType, TextEffect, PosterAspect, UserProfile } from './types';
+import { AppMode, PosterData, TemplateStyle, LayoutType, TextEffect, PosterAspect } from './types';
 import { DEFAULT_BACKGROUNDS, AVAILABLE_FONTS, SUPPORTED_LANGUAGES, UI_TRANSLATIONS } from './constants';
 import { generateBackground } from './services/geminiService';
 import PosterPreview from './components/PosterPreview';
@@ -12,13 +12,7 @@ const App: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeUploadField, setActiveUploadField] = useState<keyof PosterData | null>(null);
   const [isGeneratingBg, setIsGeneratingBg] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [showPricing, setShowPricing] = useState(false);
   
-  // Real App: Initialize with Firebase Auth
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-
   const [data, setData] = useState<PosterData>({
     mode: AppMode.VERSE,
     verseReference: "John 3:16",
@@ -67,90 +61,8 @@ const App: React.FC = () => {
     }
   };
 
-  const handleLogin = () => {
-    // Logic: firebase.auth().signInWithPopup(googleProvider)
-    const mockUser: UserProfile = {
-        uid: "user_123",
-        name: "John Faith",
-        email: "john@grace.com",
-        phone: "+1 234 567 890",
-        isPro: false,
-        savedDesignsCount: 5,
-        lastLogin: new Date().toISOString()
-    };
-    setUser(mockUser);
-  };
-
-  const handleSaveToCloud = async () => {
-    if (!user) {
-        handleLogin();
-        return;
-    }
-    setIsSaving(true);
-    // Logic: await firestore.collection('designs').add({ ...data, userId: user.uid })
-    await new Promise(r => setTimeout(r, 1500)); // Mock delay
-    setIsSaving(false);
-    alert("Saved successfully to your GraceLens cloud account!");
-  };
-
-  const handleGoPro = () => {
-    setShowPricing(true);
-    setIsUserMenuOpen(false);
-  };
-
-  // Pricing Modal Component
-  const PricingModal = () => (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
-        <div className="bg-white rounded-[2.5rem] shadow-2xl max-w-lg w-full overflow-hidden relative border border-slate-100">
-            <button onClick={() => setShowPricing(false)} className="absolute top-6 right-6 p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400">
-                <X size={20} />
-            </button>
-            
-            <div className="p-8 pt-12 text-center">
-                <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
-                    <Crown size={32} />
-                </div>
-                <h2 className="text-3xl font-bold text-slate-900">Upgrade to Pro</h2>
-                <p className="text-slate-500 mt-2">Unlock unlimited cloud storage and HD downloads.</p>
-                
-                <div className="mt-8 space-y-4">
-                    <div className="flex items-center gap-3 text-left p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                        <ShieldCheck className="text-green-500" />
-                        <div>
-                            <p className="font-bold text-slate-800">Unlimited Cloud Saves</p>
-                            <p className="text-xs text-slate-500">Keep all your designs forever.</p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-3 text-left p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                        <Wand2 className="text-blue-500" />
-                        <div>
-                            <p className="font-bold text-slate-800">Premium AI Textures</p>
-                            <p className="text-xs text-slate-500">Exclusive access to new abstract styles.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="mt-10 mb-2">
-                    <div className="text-4xl font-black text-slate-900">$4.99<span className="text-sm font-medium text-slate-400">/month</span></div>
-                </div>
-
-                <button 
-                    onClick={() => alert("Redirecting to Stripe Checkout...")}
-                    className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-black transition-all shadow-xl shadow-slate-200 mt-4 group"
-                >
-                    <CreditCard size={20} /> Pay Safely with Stripe
-                </button>
-                <p className="text-[10px] text-slate-400 mt-4 uppercase tracking-widest flex items-center justify-center gap-1">
-                    <ShieldCheck size={10} /> Secure SSL Encrypted Payment
-                </p>
-            </div>
-        </div>
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900">
-      {showPricing && <PricingModal />}
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={(e) => {
         if (e.target.files && e.target.files[0] && activeUploadField) {
             const reader = new FileReader();
@@ -179,41 +91,28 @@ const App: React.FC = () => {
           </div>
           
           <div className="flex items-center gap-3">
-             {user ? (
-                <div className="relative">
-                    <button onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm hover:border-blue-400 transition-all">
-                        <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold">{user.name[0]}</div>
-                        <span className="text-xs font-bold text-slate-700 hidden sm:inline">{user.name}</span>
-                        {user.isPro && <Crown size={12} className="text-amber-500" />}
-                    </button>
-                    {isUserMenuOpen && (
-                        <div className="absolute top-full right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden animate-in slide-in-from-top-2">
-                            <div className="p-5 border-b border-slate-50 bg-slate-50/50">
-                                <p className="font-bold text-slate-900">{user.name}</p>
-                                <p className="text-xs text-slate-500 flex items-center gap-1.5 mt-1"><Phone size={10} /> {user.phone}</p>
-                                {!user.isPro && (
-                                    <button onClick={handleGoPro} className="mt-4 w-full bg-amber-100 text-amber-700 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-amber-200 transition-all">
-                                        <Crown size={14} /> Upgrade to Pro
-                                    </button>
-                                )}
-                            </div>
-                            <div className="p-2">
-                                <button className="w-full text-left px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg flex items-center gap-2"><Cloud size={14} /> My Cloud Designs</button>
-                                <button onClick={() => setUser(null)} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-2"><LogOut size={14} /> Sign Out</button>
-                            </div>
-                        </div>
-                    )}
-                </div>
-             ) : (
-                <button onClick={handleLogin} className="flex items-center gap-2 bg-slate-900 text-white px-5 py-2 rounded-full text-xs font-bold hover:bg-black transition-all shadow-lg">
-                    <LogIn size={14} /> Sign In
-                </button>
-             )}
+             {/* Sign in removed */}
           </div>
         </div>
       </header>
 
       <main className="flex-1 w-full max-w-2xl mx-auto px-4 py-8 flex flex-col items-center gap-8">
+        {/* Mode Switcher */}
+        <div className="flex bg-slate-200/50 p-1 rounded-2xl w-full max-w-sm shadow-inner border border-slate-200">
+            <button 
+                onClick={() => updateData({ mode: AppMode.VERSE })}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all ${data.mode === AppMode.VERSE ? 'bg-white text-slate-900 shadow-md' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+                <BookOpen size={16} /> Bible Verse
+            </button>
+            <button 
+                onClick={() => updateData({ mode: AppMode.EVENT })}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all ${data.mode === AppMode.EVENT ? 'bg-white text-slate-900 shadow-md' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+                <Calendar size={16} /> Event Poster
+            </button>
+        </div>
+
         {/* Preview Area */}
         <div className="relative w-fit flex flex-col items-center gap-6">
             <PosterPreview data={data} ref={posterRef} onTriggerUpload={(f) => { setActiveUploadField(f); fileInputRef.current?.click(); }} onUpdateData={updateData} />
@@ -232,9 +131,6 @@ const App: React.FC = () => {
 
             <div className="flex gap-3 w-full">
                 <button onClick={() => posterRef.current && window.html2canvas(posterRef.current).then(c => { const a = document.createElement('a'); a.download='poster.png'; a.href=c.toDataURL(); a.click(); })} className="flex-1 bg-slate-900 text-white py-4 rounded-2xl font-bold flex justify-center items-center gap-2 shadow-xl hover:bg-black"><Download size={20} /> Download</button>
-                <button onClick={handleSaveToCloud} disabled={isSaving} className={`flex-none w-16 ${isSaving ? 'bg-slate-100' : 'bg-green-50'} text-green-600 border border-green-100 py-4 rounded-2xl font-bold flex justify-center items-center`}>
-                    {isSaving ? <div className="w-5 h-5 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div> : <Save size={20} />}
-                </button>
                 <button onClick={() => navigator.share && navigator.share({title: 'My Poster', text: 'Created with GraceLens'})} className="flex-none w-16 bg-white text-slate-700 border-2 border-slate-100 py-4 rounded-2xl font-bold flex justify-center items-center"><Share2 size={20} /></button>
             </div>
         </div>
@@ -243,11 +139,7 @@ const App: React.FC = () => {
       </main>
 
       <footer className="bg-white border-t border-slate-200 mt-12 py-8 text-center">
-        <p className="text-slate-400 text-sm font-medium">&copy; {new Date().getFullYear()} GraceLens. Built with Firebase & Stripe.</p>
-        <div className="flex justify-center gap-6 mt-4">
-            <span className="text-[10px] text-slate-300 font-bold uppercase tracking-tighter flex items-center gap-1"><Cloud size={10}/> Data Encrypted</span>
-            <span className="text-[10px] text-slate-300 font-bold uppercase tracking-tighter flex items-center gap-1"><ShieldCheck size={10}/> Payment Secure</span>
-        </div>
+        <p className="text-slate-400 text-sm font-medium">&copy; {new Date().getFullYear()} GraceLens. Create and share spiritual posters.</p>
       </footer>
     </div>
   );

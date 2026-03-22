@@ -100,6 +100,7 @@ const PosterPreview = forwardRef<HTMLDivElement, Props>(({ data, scale = 1, onTr
     const base: React.CSSProperties = {
       fontFamily: data.fontFamily,
       color: color,
+      paintOrder: 'stroke fill',
     };
 
     if (color.startsWith('linear-gradient')) {
@@ -110,31 +111,68 @@ const PosterPreview = forwardRef<HTMLDivElement, Props>(({ data, scale = 1, onTr
         base.color = 'transparent'; 
     }
 
+    const outlineColor = color === '#000000' || color.startsWith('rgba(0,0,0') ? '#ffffff' : '#000000';
+    const shadowColor = 'rgba(0,0,0,0.8)';
+
     switch (effect) {
       case TextEffect.SHADOW_SOFT:
-        return { ...base, textShadow: '0 4px 8px rgba(0,0,0,0.5)' };
+        return { 
+          ...base, 
+          textShadow: `0 2px 10px ${shadowColor}, 0 0 2px ${shadowColor}` 
+        };
       case TextEffect.SHADOW_HARD:
-        return { ...base, textShadow: '3px 3px 0px rgba(0,0,0,1)' };
+        return { 
+          ...base, 
+          textShadow: `3px 3px 0px ${shadowColor}, 4px 4px 8px rgba(0,0,0,0.3)` 
+        };
       case TextEffect.OUTLINE:
         return { 
           ...base, 
-          WebkitTextStroke: `1px ${color === '#000000' ? '#ffffff' : '#000000'}`, 
-          textShadow: 'none' 
+          // Multi-layered shadow for a perfectly solid outline that doesn't eat the font
+          textShadow: `
+            -1.5px -1.5px 0 ${outlineColor},  
+             1.5px -1.5px 0 ${outlineColor},
+            -1.5px  1.5px 0 ${outlineColor},
+             1.5px  1.5px 0 ${outlineColor},
+             0px 2px 10px rgba(0,0,0,0.5)
+          `
         };
       case TextEffect.NEON:
         return { 
           ...base, 
-          textShadow: `0 0 5px #fff, 0 0 10px ${color}, 0 0 20px ${color}` 
+          textShadow: `0 0 5px #fff, 0 0 10px ${color}, 0 0 20px ${color}, 0 0 40px ${color}` 
         };
       case TextEffect.RETRO:
-        return { ...base, textShadow: '2px 2px 0 #d1d5db, 4px 4px 0 #9ca3af' };
+        return { 
+          ...base, 
+          textShadow: `
+            1px 1px 0px #d1d5db, 
+            2px 2px 0px #9ca3af, 
+            3px 3px 0px #4b5563,
+            4px 4px 10px rgba(0,0,0,0.4)
+          ` 
+        };
       case TextEffect.ELEGANT:
-        return { ...base, textShadow: '0px 1px 0px rgba(255,255,255,0.4), 0px -1px 0px rgba(0,0,0,0.4)' };
+        return { 
+          ...base, 
+          textShadow: `
+            0px 1px 0px rgba(255,255,255,0.3), 
+            0px -1px 0px rgba(0,0,0,0.3),
+            0px 4px 12px rgba(0,0,0,0.5)
+          ` 
+        };
       case TextEffect.GLITCH:
-        return { ...base, textShadow: '2px 0 rgba(255,0,0,0.5), -2px 0 rgba(0,0,255,0.5)' };
+        return { 
+          ...base, 
+          textShadow: `2px 0 rgba(255,0,0,0.8), -2px 0 rgba(0,0,255,0.8), 0 2px 4px rgba(0,0,0,0.3)` 
+        };
       case TextEffect.NONE:
       default:
-        return base;
+        // Even for NONE, add a very subtle lift to ensure visibility on busy backgrounds
+        return {
+          ...base,
+          textShadow: '0 1px 3px rgba(0,0,0,0.3)'
+        };
     }
   };
 
@@ -142,8 +180,15 @@ const PosterPreview = forwardRef<HTMLDivElement, Props>(({ data, scale = 1, onTr
   const accentStyle: React.CSSProperties = {
     fontFamily: data.fontFamily,
     color: data.textColor.startsWith('linear-gradient') ? '#ffffff' : data.textColor,
-    opacity: 0.9,
-    textShadow: '0px 1px 2px rgba(0,0,0,0.5)',
+    opacity: 1,
+    // Improved visibility for references by default
+    textShadow: `
+      -1px -1px 0 rgba(0,0,0,0.5),  
+       1px -1px 0 rgba(0,0,0,0.5),
+      -1px  1px 0 rgba(0,0,0,0.5),
+       1px  1px 0 rgba(0,0,0,0.5),
+       0px 2px 4px rgba(0,0,0,0.8)
+    `,
   };
 
   // Dynamic dimensions based on aspect ratio

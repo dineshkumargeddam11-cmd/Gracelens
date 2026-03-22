@@ -51,12 +51,12 @@ const EditorPanel: React.FC<Props> = ({ data, onUpdate }) => {
   ];
 
   const TEXT_EFFECTS = [
-    { id: TextEffect.NONE, label: 'None', style: {} },
-    { id: TextEffect.SHADOW_SOFT, label: 'Soft', style: { textShadow: '0 2px 4px rgba(0,0,0,0.4)' } },
-    { id: TextEffect.SHADOW_HARD, label: 'Bold', style: { textShadow: '2px 2px 0 #000' } },
-    { id: TextEffect.OUTLINE, label: 'Outline', style: { WebkitTextStroke: '1px black', color: 'transparent' } },
+    { id: TextEffect.NONE, label: 'None', style: { textShadow: '0 1px 2px rgba(0,0,0,0.3)' } },
+    { id: TextEffect.SHADOW_SOFT, label: 'Soft', style: { textShadow: '0 2px 6px rgba(0,0,0,0.6)' } },
+    { id: TextEffect.SHADOW_HARD, label: 'Bold', style: { textShadow: '2px 2px 0 rgba(0,0,0,0.8)' } },
+    { id: TextEffect.OUTLINE, label: 'Outline', style: { textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' } },
     { id: TextEffect.NEON, label: 'Neon', style: { textShadow: '0 0 5px #fff, 0 0 10px currentColor' } },
-    { id: TextEffect.RETRO, label: 'Retro', style: { textShadow: '2px 2px 0 #ccc, 4px 4px 0 #999' } },
+    { id: TextEffect.RETRO, label: 'Retro', style: { textShadow: '1px 1px 0 #ccc, 2px 2px 0 #999' } },
   ];
 
   useEffect(() => {
